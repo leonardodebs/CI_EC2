@@ -28,10 +28,11 @@ jobs:
       with:
         go-version: ${{ matrix.go_version }}
 
-    - name: Install Docker and Docker Compose Plugin
+    - name: Install Docker and Docker Compose
       run: |
-        sudo apt update
-        sudo apt install -y docker.io
+        # Instala Docker + Compose via script oficial
+        curl -fsSL https://get.docker.com -o get-docker.sh
+        sudo sh get-docker.sh
         docker --version
         docker compose version
 
