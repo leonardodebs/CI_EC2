@@ -18,9 +18,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 3️⃣ Instalar Docker e Docker Compose
+      # 3️⃣ Instalar Docker e Docker Compose plugin
       - name: Setup Docker
         uses: docker/setup-docker@v3
+        with:
+          docker-ce-version: "latest"
 
       # 4️⃣ Deploy via SSH usando chave privada
       - name: Deploy to Staging server
@@ -31,7 +33,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            # Configurar variáveis de ambiente do banco
+            # Exportar variáveis de ambiente do banco
             export HOST=${{ secrets.DBHOST }}
             export USER=${{ secrets.DBUSER }}
             export PASSWORD=${{ secrets.DBPASSWORD }}
@@ -42,7 +44,10 @@ jobs:
             # Entrar na pasta do projeto
             cd /home/${{ secrets.REMOTE_USER }}/programa
 
-            # Parar containers antigos, atualizar e subir containers
-            docker-compose down
-            docker-compose pull
-            docker-compose up -d
+            # Garantir que Docker Compose plugin está disponível
+            docker compose version
+
+            # Parar containers antigos, atualizar imagens e subir containers
+            docker compose down
+            docker compose pull
+            docker compose up -d
