@@ -14,10 +14,13 @@ jobs:
 
       - uses: actions/checkout@v4
 
-      - name: Install Docker Compose
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+      # Configura o Buildx (para builds Docker avançados)
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # Configura o Docker Compose (sem precisar instalar pacote)
+      - name: Setup Docker Compose
+        uses: docker/setup-compose-action@v2
 
       - name: Deploy to Staging server
         uses: easingthemes/ssh-deploy@main
