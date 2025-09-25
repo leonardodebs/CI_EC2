@@ -47,7 +47,7 @@ jobs:
     - name: Run Tests
       # O host 'postgres' é o nome do serviço definido acima
       env:
-        HOST: postgres
+        HOST: localhost
         DBPORT: 5432
         USER: root
         PASSWORD: root
