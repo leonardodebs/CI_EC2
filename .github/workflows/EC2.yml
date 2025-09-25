@@ -7,25 +7,10 @@ jobs:
   deploy-ec2:
     runs-on: ubuntu-latest
     steps:
-
-      # 1️⃣ Baixar o artifact buildado
-      - name: Download Build Artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: programa
-
-      # 2️⃣ Fazer checkout do repositório
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v3
 
-      # 3️⃣ Instalar Docker e Docker Compose plugin
-      - name: Setup Docker
-        uses: docker/setup-docker@v3
-        with:
-          docker-ce-version: "latest"
-
-      # 4️⃣ Deploy via SSH usando chave privada
-      - name: Deploy to Staging server
+      - name: Deploy via SSH
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.REMOTE_HOST }}
@@ -33,7 +18,9 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            # Exportar variáveis de ambiente do banco
+            sudo apt update
+            sudo apt install -y docker.io docker-compose-plugin
+
             export HOST=${{ secrets.DBHOST }}
             export USER=${{ secrets.DBUSER }}
             export PASSWORD=${{ secrets.DBPASSWORD }}
@@ -41,13 +28,7 @@ jobs:
             export DBPORT=${{ secrets.DBPORT }}
             export PORT=8000
 
-            # Entrar na pasta do projeto
             cd /home/${{ secrets.REMOTE_USER }}/programa
 
-            # Garantir que Docker Compose plugin está disponível
-            docker compose version
-
-            # Parar containers antigos, atualizar imagens e subir containers
-            docker compose down
             docker compose pull
-            docker compose up -d
+            docker compose up -d --remove-orphans
