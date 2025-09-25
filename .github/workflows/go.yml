@@ -28,24 +28,22 @@ jobs:
       with:
         go-version: ${{ matrix.go_version }}
 
-    - name: Install Docker & Compose Plugin
+    - name: Install Docker and Docker Compose Plugin
       run: |
         sudo apt update
-        sudo apt install -y docker.io docker-compose-plugin
+        sudo apt install -y docker.io
+        docker --version
+        docker compose version
 
-    
-      
-    - name: Build-DB
+    - name: Build DB
       run: docker compose build
 
-      
-    - name: Create-DB
-      run: docker-compose up -d
+    - name: Create DB
+      run: docker compose up -d
 
-    - name: Test
+    - name: Run Tests
       run: go test -v main_test.go 
       
-  
   build:
     needs: test
     runs-on: ubuntu-latest
@@ -54,20 +52,16 @@ jobs:
     - name: Build
       run: go build -v main.go
       
-    - name: Upload a Build Artifact
+    - name: Upload Build Artifact
       uses: actions/upload-artifact@v3.1.0
       with:
-    # Artifact name
         name: programa
-    # A file, directory or wildcard pattern that describes what to upload
         path: main
-
 
   docker:
     needs: build
     uses: ./.github/workflows/Docker.yml
     secrets: inherit
-
 
   Deploy_EC2:
     needs: build
