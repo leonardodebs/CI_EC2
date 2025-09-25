@@ -4,43 +4,45 @@ on:
   workflow_call:
 
 jobs:
+  deploy-ec2:
+    runs-on: ubuntu-latest
+    steps:
 
-  EC2:
-     runs-on: ubuntu-latest
-     steps:
-      - name: Download a Build Artifact
-        uses: actions/download-artifact@v3.0.0
+      # 1️⃣ Baixar o artifact buildado
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v3
         with:
-    # Artifact name
           name: programa
-      - uses: actions/checkout@v3
-      
-      - name: Install Docker Compose
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y docker-compose
 
+      # 2️⃣ Fazer checkout do repositório
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 3️⃣ Instalar Docker e Docker Compose
+      - name: Setup Docker
+        uses: docker/setup-docker@v3
+
+      # 4️⃣ Deploy via SSH usando chave privada
       - name: Deploy to Staging server
-        uses: easingthemes/ssh-deploy@main
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-          REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          TARGET: /home/${{ secrets.REMOTE_USER }}
-          EXCLUDE: "postgres-data"
-
-      - name: executing remote ssh commands using password
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY}}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
+            # Configurar variáveis de ambiente do banco
             export HOST=${{ secrets.DBHOST }}
             export USER=${{ secrets.DBUSER }}
             export PASSWORD=${{ secrets.DBPASSWORD }}
             export DBNAME=${{ secrets.DBNAME }}
             export DBPORT=${{ secrets.DBPORT }}
             export PORT=8000
-          
+
+            # Entrar na pasta do projeto
+            cd /home/${{ secrets.REMOTE_USER }}/programa
+
+            # Parar containers antigos, atualizar e subir containers
+            docker-compose down
+            docker-compose pull
+            docker-compose up -d
