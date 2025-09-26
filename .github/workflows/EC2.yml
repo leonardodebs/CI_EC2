@@ -15,9 +15,6 @@ jobs:
         with:
           name: programa
 
-      - name: Rename artifact
-        run: mv main programa
-
       - name: Copy artifact to EC2 via SCP
         uses: appleboy/scp-action@v0.1.4
         with:
@@ -25,10 +22,7 @@ jobs:
           username: ${{ secrets.REMOTE_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
-          source: |
-            programa
-            templates
-            assets
+          source: "programa,templates,assets"
           target: "/home/${{ secrets.REMOTE_USER }}"
 
       - name: Execute remote SSH commands
