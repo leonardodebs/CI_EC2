@@ -21,9 +21,6 @@ jobs:
         with:
           name: programa
 
-      - name: Rename artifact
-        run: mv main programa
-
       - name: Add execute permission to artifact
         run: chmod +x programa
 
