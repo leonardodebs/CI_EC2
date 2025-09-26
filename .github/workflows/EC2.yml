@@ -12,33 +12,19 @@ jobs:
         with:
           name: programa
 
-      - uses: actions/checkout@v4
-
-      # Configura o Buildx (para builds Docker avançados)
-      - name: Setup Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      # Configura o Docker Compose (sem precisar instalar pacote)
-      - name: Setup Docker Compose
-        uses: docker/setup-compose-action@v2
-
-      - name: Deploy to Staging server
-        uses: easingthemes/ssh-deploy@main
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-          REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          TARGET: /home/${{ secrets.REMOTE_USER }}
-          EXCLUDE: "postgres-data"
-
       - name: Execute remote SSH commands
-        uses: appleboy/ssh-action@v0.1.7
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
+          source: "programa" # Arquivo a ser copiado
+          target: "/home/${{ secrets.REMOTE_USER }}" # Diretório de destino
           script: |
+            # Renomeia o artefato para 'main' para consistência
+            mv programa main
+
             export HOST=${{ secrets.DBHOST }}
             export USER=${{ secrets.DBUSER }}
             export PASSWORD=${{ secrets.DBPASSWORD }}
@@ -46,4 +32,8 @@ jobs:
             export DBPORT=${{ secrets.DBPORT }}
             export PORT=8000
             chmod +x main
+
+            # Para qualquer processo 'main' antigo antes de iniciar um novo
+            pkill main || true
+
             nohup ./main > nohup.out 2> nohup.err < /dev/null &
