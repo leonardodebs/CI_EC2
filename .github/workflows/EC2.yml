@@ -12,6 +12,9 @@ jobs:
         with:
           name: programa
 
+      - name: Rename artifact
+        run: mv main programa
+
       - name: Copy artifact to EC2 via SCP
         uses: appleboy/scp-action@v0.1.4
         with:
