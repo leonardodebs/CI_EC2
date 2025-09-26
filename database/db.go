@@ -1,6 +1,7 @@
 package database
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"github.com/guilhermeonrails/api-go-gin/models"
@@ -14,11 +15,17 @@ var (
 )
 
 func ConectaComBancoDeDados() {
-	
-	stringDeConexao := "host="+os.Getenv("HOST")+" user="+os.Getenv("USER")+" password="+os.Getenv("PASSWORD")+" dbname="+os.Getenv("DBNAME")+" port="+os.Getenv("DBPORT")+" sslmode=disable"
-	DB, err = gorm.Open(postgres.Open(stringDeConexao))
+
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
+		os.Getenv("HOST"),
+		os.Getenv("USER"),
+		os.Getenv("PASSWORD"),
+		os.Getenv("DBNAME"),
+		os.Getenv("DBPORT"),
+	)
+	DB, err = gorm.Open(postgres.Open(dsn))
 	if err != nil {
-		log.Panic("Erro ao conectar com banco de dados")
+		log.Panicf("Erro ao conectar com banco de dados: %v", err)
 	}
 
 	DB.AutoMigrate(&models.Aluno{})
