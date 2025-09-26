@@ -1,13 +1,11 @@
-FROM ubuntu:latest
+# Use a imagem "distroless", que é mínima, mais leve e segura para binários Go.
+FROM gcr.io/distroless/static-debian11
 
 EXPOSE 8000
 
 WORKDIR /app
 
-ENV HOST=localhost DBPORT=5432
+# Copia o executável "programa" (renomeado no workflow) para a imagem.
+COPY ./programa .
 
-ENV USER=root PASSWORD=root DBNAME=root
-
-COPY ./main main
-
-CMD [ "./main" ]
+CMD [ "./programa" ]
