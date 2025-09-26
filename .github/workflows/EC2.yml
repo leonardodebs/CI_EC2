@@ -7,6 +7,9 @@ jobs:
   EC2:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Download a Build Artifact
         uses: actions/download-artifact@v4
         with:
@@ -22,7 +25,10 @@ jobs:
           username: ${{ secrets.REMOTE_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
-          source: "programa"
+          source: |
+            programa
+            templates
+            assets
           target: "/home/${{ secrets.REMOTE_USER }}"
 
       - name: Execute remote SSH commands
